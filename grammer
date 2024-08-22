@@ -1,21 +1,26 @@
 expr				 : comp-expr ((KEYWORD:AND|KEYWORD:OR) comp-expr)*
 
 comp-expr		: NOT comp-expr
-						: arith-expr ((EE|LT|GT|LTE|GTE) arith-expr)*
+				: arith-expr ((EE|LT|GT|LTE|GTE) arith-expr)*
 
 arith-expr	:	term ((PLUS|MINUS) term)*
 
 term				: factor ((MUL|DIV) factor)*
 
 factor			: (PLUS|MINUS) factor
-						: call
+			    : call
 
 call				: atom (LPAREN (expr (COMMA expr)*)? RPAREN)?
 
 atom 				: INT |IDENTIFIER
 						: LPAREN expr RPAREN
 						: func-def
+						: lambd-def
 
-func-def		: KEYWORD:FUN IDENTIFIER?
+func-def		:KEYWORD:FUN IDENTIFIER?
 							LPAREN (IDENTIFIER (COMMA IDENTIFIER)*)? RPAREN
 							ARROW expr
+
+lambd-def      :KEYWORD:FUN
+                    LPAREN (IDENTIFIER (COMMA IDENTIFIER)*)? RPAREN
+				    ARROW expr

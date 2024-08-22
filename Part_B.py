@@ -8,101 +8,137 @@ def fibonacci_sequence(n):
 
 
 # 2. Concatenate Strings with a Space (Without 'join')
-def concatenate_strings():
-    lst = input("Enter a list of strings separated by commas: ").split(',')
-    concat_strings = lambda lst: reduce(lambda x, y: x + ' ' + y, lst)
-    print(f"Concatenated string: {concat_strings(lst)}")
+def concat_with_space(lst):
+    return reduce(lambda x, y: x + ' ' + y, lst)
 
 
 # 3. Cumulative Sum of Squares of Even Numbers in Sublists
-def cumulative_sum_squares():
-    lst = [
-        list(map(int, input("Enter numbers for sublist separated by spaces: ").split()))
-        for _ in range(int(input("Enter the number of sublists: ")))
-    ]
-    cum_sum_squares = lambda lst: list(
-        map(lambda sub: reduce(lambda acc, x: acc + (lambda y: y ** 2)(x), filter(lambda x: x % 2 == 0, sub), 0), lst))
-    print(f"Cumulative sum of squares of even numbers: {cum_sum_squares(lst)}")
+def cumulative_sum_of_squares(lists):
+    process_sublist = lambda sublist: (
+        (lambda filter_evens: (
+            (lambda square_evens: (
+                (lambda sum_squares: (
+                    (lambda total: total)(
+                        sum_squares
+                    )
+                ))(
+                    sum(square_evens)
+                )
+            ))(
+                [x ** 2 for x in filter_evens]
+            )
+        ))(
+            [x for x in sublist if x % 2 == 0]
+        )
+    )
+
+    # Apply the nested lambda function to each sublist
+    result = list(map(process_sublist, lists))
+    return result
 
 
-# 4. Higher-Order Function for Cumulative Operation (Factorial and Exponentiation)
-def higher_order_function():
-    def cumulative(op):
-        return lambda seq: reduce(op, seq)
+def cumulative_operation(op):
+    """
+    Higher-order function that takes a binary operation (as a lambda function)
+    and returns a function that applies this operation cumulatively to a sequence.
+    """
+    def apply_cumulative(sequence):
+        # Start with the first element of the sequence
+        result = sequence[0]
+        # Apply the operation cumulatively
+        for element in sequence[1:]:
+            result = op(result, element)
+        return result
+    return apply_cumulative
 
-    factorial = cumulative(lambda x, y: x * y)
-    exponentiation = lambda base, exp: cumulative(lambda x, _: x * base)([base] * (exp - 1))
+# Define the binary operation for multiplication
+multiplication = lambda x, y: x * y
 
-    choice = input("Choose 'factorial' or 'exponentiation': ").strip().lower()
+# Create the factorial function using cumulative_operation
+factorial = cumulative_operation(multiplication)
 
-    if choice == 'factorial':
-        n = int(input("Enter the number to calculate factorial: "))
-        print(f"Factorial of {n}: {factorial(range(1, n + 1))}")
-    elif choice == 'exponentiation':
-        base = int(input("Enter the base: "))
-        exp = int(input("Enter the exponent: "))
-        print(f"{base} raised to the power of {exp}: {exponentiation(base, exp)}")
-    else:
-        print("Invalid choice!")
+# Factorial function that calculates the factorial of n
+def factorial_function(n):
+    if n < 0:
+        raise ValueError("Factorial is not defined for negative numbers.")
+    # Create a sequence from 1 to n
+    sequence = list(range(1, n + 1))
+    return factorial(sequence)
+
+# Define the binary operation for exponentiation
+# Exponentiation operation is handled within the function itself
+def exponentiation_function(base, exponent):
+    if exponent < 0:
+        raise ValueError("Exponentiation with negative exponents is not handled.")
+    # Create a sequence with 'base' repeated 'exponent' times
+    sequence = [base] * exponent
+    # Use cumulative_operation with multiplication to perform exponentiation
+    power = cumulative_operation(multiplication)
+    return power(sequence)
 
 
 # 5. Filter, Map, Reduce for Sum of Squares of Even Numbers
 def sum_of_squares_of_evens():
     nums = [1, 2, 3, 4, 5, 6]
-    result = reduce(lambda acc, x: acc + x ** 2, map(lambda x: x ** 2, filter(lambda x: x % 2 == 0, nums)), 0)
-    print(f"Sum of squares of even numbers: {result}")
+    sum_squared = reduce(lambda x, y: x + y, map(lambda x: x ** 2, filter(lambda x: x % 2 == 0, nums)))
+    print(sum_squared)
 
 
 # 6. Count Palindromes in Sublists
-def count_palindromes():
-    lst = [
-        input("Enter strings for sublist separated by commas: ").split(',')
-        for _ in range(int(input("Enter the number of sublists: ")))
-    ]
-    count_palindromes = lambda lst: list(map(lambda sub: len(list(filter(lambda s: s == s[::-1], sub))), lst))
-    print(f"Number of palindromes in each sublist: {count_palindromes(lst)}")
+def count_palindromes_in_sublists(lists_of_strings):
+    return list(map(lambda sublist: reduce(lambda count, s: count + (s == s[::-1]), sublist, 0), lists_of_strings))
 
 
 # 7. Lazy Evaluation Explanation
 def lazy_evaluation_explanation():
-    def generate_values():
-        print('Generating values...')
-        yield 1
-        yield 2
-        yield 3
-
-    def square(x):
-        print(f'Squaring {x}')
-        return x * x
-
-    print('Eager evaluation:')
-    values = list(generate_values())
-    squared_values = [square(x) for x in values]
-    print(squared_values)
-
-    print('\nLazy evaluation:')
-    squared_values = [square(x) for x in generate_values()]
-    print(squared_values)
-
+    print("In the context of your program, lazy evaluation refers to a process where values are computed only when they are\n"
+          "actually needed, rather than being evaluated all at once. In your program, when using generate_values() within a\n"
+          "list comprehension, values are generated and processed only as they are required, rather than being precomputed and stored\n"
+          "in memory. This approach conserves memory and improves performance by deferring the computation of values until they are\n"
+          "specifically needed.")
 
 # 8. Filter and Sort Prime Numbers in Descending Order
-def primes_descending():
-    is_prime = lambda n: n > 1 and all(n % i != 0 for i in range(2, int(n ** 0.5) + 1))
-    lst = list(map(int, input("Enter a list of integers separated by spaces: ").split()))
-    primes_desc = lambda lst: sorted(filter(is_prime, lst), reverse=True)
-    print(f"Prime numbers in descending order: {primes_desc(lst)}")
+def primes_descending(nums):
+    return sorted([x for x in nums if (x > 1 and all(x % i != 0 for i in range(2, int(x**0.5) + 1)))], reverse=True)
+def q1():
+    lambda: fibonacci_sequence(int(input("Enter the number of Fibonacci numbers to generate: ")))
 
+def q2():
+     print()
+
+def q3():
+    input_list = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+    result = cumulative_sum_of_squares(input_list)
+    print(result)
+
+def q4():
+    print(factorial_function(5))  # Output: 120
+    print(exponentiation_function(2, 3))
+
+def q5():
+    sum_of_squares_of_evens()
+
+def q6():
+    lists_of_strings = [["level", "world", "radar"], ["apple", "banana", "civic"], ["madam", "racecar"]]
+    print(count_palindromes_in_sublists(lists_of_strings))
+
+def q7():
+    lazy_evaluation_explanation()
+
+def q8():
+    nums = [10, 15, 2, 7, 3, 11, 6]
+    print(primes_descending(nums))
 
 def main():
     options = {
-        '1': lambda: fibonacci_sequence(int(input("Enter the number of Fibonacci numbers to generate: "))),
-        '2': lambda: concatenate_strings([s.strip() for s in input("Enter a list of strings separated by commas: ").split(',')]),
-        '3': cumulative_sum_squares,
-        '4': higher_order_function,
-        '5': sum_of_squares_of_evens,
-        '6': count_palindromes,
-        '7': lazy_evaluation_explanation,
-        '8': primes_descending
+        '1': q1,
+        '2': q2,
+        '3': q3,
+        '4': q4,
+        '5': q5,
+        '6': q6,
+        '7': q7,
+        '8': q8
     }
 
     while True:

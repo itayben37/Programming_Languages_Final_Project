@@ -1,0 +1,68 @@
+5+5 > 2
+(3>0) AND (4<2)
+123 % 14
+(1+1)*13 == 27 OR 8 / 2 == 4
+FUN a(b,c) -> NOT(b+c==7)
+a(3,4)
+FUN a(b,c) -> ((b+c==5) AND (3>=3)) OR (6==6)
+a(2,3)
+a(1,3)
+FUN sum(n) -> IF (n==0) THEN 0 ELSE n + sum(n-1)
+sum(5)
+sum(13)
+
+FUN mul(a,b)-> a*b
+mul(5,6)
+mul(1,0)
+FUN sum_mul(a,b) -> IF a==0 AND b==0 THEN 0 ELIF a > b THEN a*b + mul(a-1, b) ELIF a < b THEN a*b + mul(a,b-1) ELSE a*b+mul(a-1,b-1)
+sum_mul(4,5)
+sum_mul(3, 2)
+
+FUN aa(a,b) -> a*b
+FUN bb(a,b,c) -> c*aa(a,b)
+bb(aa,1,2,3)
+
+#errors
+FUN add(n) - > n *n
+FUN m(,n) -> n * n
+3 > d
+34 ^ 2
+ad(n)
+
+
+
+
+
+
+
+
+#Arithmetic Operations
+addition 3 + 4 == 7 #PLUS
+subtraction 5 -2 == 3 #MINUS
+multiplication 6 * 3 == 18 #MUL
+division 8 / 2 == 4 #DIV
+modolu 5 % 2 == 1#MOD
+parentheses (3+2)*4 #Parentheses
+
+
+#Compartion Operations
+equality_comparison 3 + 4 == 7 #EE
+not_equal 3 + 3 != 7 #NE
+less_than 3 < 5 #LT
+greater_than 7 > 4 #GT
+less_than_or_equal_to 3 <= 3 #LTE
+greater_than_or_equal_to 5 >= 2 #GTE
+
+
+#Logical Operations
+and 0 < 1 AND 1 > 0 == 1 #AND
+or  2 >= 1 OR 0 < 1 == 1 #OR
+not NOT 0 == 1           #NOT
+
+
+#Function Definition
+FUN a(n) -> n + n #FUN
+
+#Function Applications
+a(3) #call
+
