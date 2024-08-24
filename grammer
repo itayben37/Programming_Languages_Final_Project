@@ -47,6 +47,8 @@ RPAREN : )
 
 COMMA : ,
 
+COLON : :
+
 IDENTIFIER : LETTERS((LETTERS | DIGIT*)*)?
 
 LETTERS : a-z, A-Z
