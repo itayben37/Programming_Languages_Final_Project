@@ -118,7 +118,7 @@ TT_GTE = 'GTE'
 TT_COMMA = 'COMMA'
 TT_ARROW = 'ARROW'
 TT_MODULO = 'MODULO'
-
+TT_COL = 'COL'
 
 KEYWORDS = [
  	'AND',
@@ -213,6 +213,9 @@ class Lexer:
             elif self.current_char == ',':
                 tokens.append(Token(TT_COMMA, pos_start=self.pos))
                 self.advance()
+            elif self.current_char == ':':
+                tokens.append(Token(TT_COL, pos_start=self.pos))
+                self.advance()
             else:
                 pos_start = self.pos.copy()
                 char = self.current_char
@@ -221,6 +224,7 @@ class Lexer:
 
         tokens.append(Token(TT_EOF, pos_start=self.pos))
         return tokens, None
+
 
     def make_number(self):
         num_str = ''
@@ -368,6 +372,12 @@ class FuncDefNode:
 
 		self.pos_end = self.body_node.pos_end
 
+class LambdDefNode:
+    def __init__(self, exp):
+        self.exp = exp
+        self.pos_start = self.exp.pos_start
+        self.pos_end = self.exp.pos_end
+
 class CallNode:
 	def __init__(self, node_to_call, arg_nodes):
 		self.node_to_call = node_to_call
@@ -427,6 +437,27 @@ class Parser:
         if self.tok_idx < len(self.tokens):
             self.current_tok = self.tokens[self.tok_idx]
         return self.current_tok
+
+    def getTokensUntil(self, index, token, tok_jump):
+        res = ParseResult()
+        list = []
+        count = 0
+        while not self.tokens[index+count].matches(Token(token).type, Token(token).value) and self.tokens[index+count] != TT_EOF:
+            if not self.tokens[index+count].matches(Token(tok_jump).type, Token(tok_jump).value):
+                list.append(self.tokens[index+count])
+            count += 1
+
+        if self.current_tok == TT_EOF:
+            return res.failure(InvalidSyntaxError(
+                    self.current_tok.pos_start, self.current_tok.pos_end,
+                    f"LAMBD was not written properly)")), 0
+        return list, index + count
+
+
+    def delete_tokens(self, start_idx, end_idx):
+        del self.tokens[start_idx:end_idx]
+        return end_idx - start_idx
+
 
     def parse(self):
         res = self.expr()
@@ -573,9 +604,7 @@ class Parser:
             return res.success(func_def)
 
         elif tok.matches(TT_KEYWORD, 'LAMBD'):
-            lambd_def = res.register(self.lamnd_def())
-            if res.error: return res
-            return res.success(lambd_def)
+           return self.lambd_def()
 
         return res.failure(InvalidSyntaxError(
             tok.pos_start, tok.pos_end,
@@ -640,7 +669,8 @@ class Parser:
             if res.error: return res
 
         return res.success(IfNode(cases, else_case))
-    def lamnd_def(self):
+
+    def lambd_def(self):
         res = ParseResult()
 
         if not self.current_tok.matches(TT_KEYWORD, 'LAMBD'):
@@ -653,6 +683,7 @@ class Parser:
         self.advance()
 
         var_name_tok = 'lambd'
+
         if self.current_tok.type != TT_LPAREN:
             return res.failure(InvalidSyntaxError(self.current_tok.pos_start, self.current_tok.pos_end,
                  f"Expected identifier or '('"))
@@ -700,17 +731,52 @@ class Parser:
                 self.current_tok.pos_start, self.current_tok.pos_end,
                 f"Expected '->'"
             ))
+        res.register_advancement()
+        self.advance()
+
+        if self.current_tok.type != TT_LPAREN:
+            return res.failure(InvalidSyntaxError(self.current_tok.pos_start, self.current_tok.pos_end,
+                                                  f"Expected identifier or '('"))
 
         res.register_advancement()
         self.advance()
+        lambd_exp, index1 = self.getTokensUntil(self.tok_idx,TT_COL, TT_EOF)
+        amount_delete = self.delete_tokens(self.tok_idx, index1)
+        lambd_values, index2 = self.getTokensUntil(index1+1-amount_delete, TT_RPAREN, TT_COMMA)
+        if(len(arg_name_toks) != len(lambd_values)):
+            return res.failure(InvalidSyntaxError(self.current_tok.pos_start, self.current_tok.pos_end,
+                                                  f"The numbers of the parametrs is wrong"))
+        dic = {}
+        for i,j in zip(arg_name_toks, lambd_values):
+            dic[f'{Token(i).type}'] = f'{j}'
+
+        new_tokens = []
+        count = 0
+        for arg in arg_name_toks:
+            for tok in lambd_exp:
+                if f'{Token(tok).type}' == f'{Token(arg).type}' and f'{Token(arg).value}' == f'{Token(tok).value}':
+                    parts = dic[f'{tok}'].split(':')
+                    after_colon = parts[1].strip()
+                    lambd_exp[count] = Token(TT_INT, after_colon, tok.pos_start)
+                    #new_tokens.append(Token(TT_INT, after_colon))
+                count += 1
+
+
+
+        self.tokens[self.tok_idx:self.tok_idx] = lambd_exp
+        del  self.tokens[self.tok_idx+amount_delete: self.tok_idx+amount_delete + 2*len(lambd_values)+1]
+        del self.tokens[self.tok_idx -4 -2*len(arg_name_toks):self.tok_idx]
+        self.tok_idx -= 4+2*len(arg_name_toks)
+
+        parser = Parser(self.tokens)
+        ast = parser.parse()
+        if ast.error: return None, ast.error
         node_to_return = res.register(self.expr())
+
         if res.error: return res
 
-        return res.success(FuncDefNode(
-            var_name_tok,
-            arg_name_toks,
-            node_to_return
-        ))
+        return res.success(LambdDefNode(self.tokens[self.tok_idx]))
+
 
 
     def func_def(self):
@@ -790,6 +856,9 @@ class Parser:
         self.advance()
         node_to_return = res.register(self.expr())
         if res.error: return res
+
+
+
 
         return res.success(FuncDefNode(
             var_name_tok,
@@ -1101,7 +1170,7 @@ class Interpreter:
 
         method_name = f'visit_{type(node).__name__}'
         method = getattr(self, method_name, self.no_visit_method)
-        return method(node, context)
+        if method_name != 'visit_LambdDefNode': return method(node, context)
 
     def no_visit_method(self, node, context):
         raise Exception(f'No visit_{type(node).__name__} method defined')
@@ -1235,24 +1304,7 @@ class Interpreter:
 
         return res.success(func_value)
 
-    def visit_LambdDefNode(self, node, context):
-        res = RTResult()
 
-        func_name = 'lambd'
-        body_node = node.body_node
-        arg_names = [arg_name.value for arg_name in node.arg_name_toks]
-        func_value = Function(func_name, body_node, arg_names).set_context(context).set_pos(node.pos_start,
-                                                                                node.pos_end)
-        if node.var_name_tok:
-            context.symbol_table.set(func_name, func_value)
-
-        parameters = ', '.join([param.name for param in node.parameters])
-        expression = self.visit(node.body)
-        func_value = f"LAMBDA {func_name}({parameters}) -> {expression}"
-
-        run('<stdin>', func_value)
-
-        return res.success(func_value)
 
     def visit_CallNode(self, node, context):
         res = RTResult()
@@ -1313,6 +1365,7 @@ def run(fn, text):
     lexer = Lexer(fn, text)
     tokens, error = lexer.make_tokens()
     if error: return None, error
+
 
      # Generate AST
     parser = Parser(tokens)

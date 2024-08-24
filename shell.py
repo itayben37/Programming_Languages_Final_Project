@@ -8,9 +8,9 @@ while cont:
 		cont = False
 
 while True:
-		text = input('basic > ')
+		text = input('program> ')
 
-		result, error = basic.run(fn, text)
+		result, error = basic.run('<stdin>', text)
 
 		if error: print(error.as_string())
 		else: print(result)

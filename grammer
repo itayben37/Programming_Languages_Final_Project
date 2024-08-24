@@ -1,11 +1,11 @@
 expr				 : comp-expr ((KEYWORD:AND|KEYWORD:OR) comp-expr)*
 
 comp-expr		: NOT comp-expr
-				: arith-expr ((EE|LT|GT|LTE|GTE) arith-expr)*
+				: arith-expr ((EE|LT|GT|LTE|GTE|NE) arith-expr)*
 
 arith-expr	:	term ((PLUS|MINUS) term)*
 
-term				: factor ((MUL|DIV) factor)*
+term				: factor ((MUL|DIV|MODOLU) factor)*
 
 factor			: (PLUS|MINUS) factor
 			    : call
@@ -24,3 +24,48 @@ func-def		:KEYWORD:FUN IDENTIFIER?
 lambd-def      :KEYWORD:FUN
                     LPAREN (IDENTIFIER (COMMA IDENTIFIER)*)? RPAREN
 				    ARROW expr
+
+PLUA : +
+
+MINUS : -
+
+MUL : *
+
+DIV : /
+
+MODOLU: %
+
+INT : DIGIT*
+
+DIGIT : 0-9
+
+ARROW : ->
+
+LPAREN : (
+
+RPAREN : )
+
+COMMA : ,
+
+IDENTIFIER : LETTERS((LETTERS | DIGIT*)*)?
+
+LETTERS : a-z, A-Z
+
+EE : ==
+
+LT : <
+
+GT : >
+
+LTE : <=
+
+GTE : >=
+
+NE : !=
+
+* : appears at least 1 times
+
+? : can not appear at all
+
+
+LAMBD(x)->(x+x:1)

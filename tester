@@ -10,7 +10,6 @@ a(1,3)
 FUN sum(n) -> IF (n==0) THEN 0 ELSE n + sum(n-1)
 sum(5)
 sum(13)
-
 FUN mul(a,b)-> a*b
 mul(5,6)
 mul(1,0)
@@ -20,7 +19,7 @@ sum_mul(3, 2)
 
 FUN aa(a,b) -> a*b
 FUN bb(a,b,c) -> c*aa(a,b)
-bb(aa,1,2,3)
+bb(1,2,3)
 
 #errors
 FUN add(n) - > n *n
@@ -66,3 +65,11 @@ FUN a(n) -> n + n #FUN
 #Function Applications
 a(3) #call
 
+
+
+cont = True
+fn = None
+while cont:
+	fn = input("enter a file name that end with .lambda\n")
+	if fn.endswith('.lambda'):
+		cont = False
