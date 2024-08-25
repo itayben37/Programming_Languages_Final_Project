@@ -22,6 +22,12 @@ FUN aa(a,b) -> a*b
 FUN bb(a,b,c) -> c*aa(a,b)
 bb(aa,1,2,3)
 
+#LAMBD
+LAMBD(x)->(x*x:3)
+FUN add(x) -> LAMBD(y)->(x+y:3)
+LAMBD(z)->(add(z):9)
+
+
 #errors
 FUN add(n) - > n *n
 FUN m(,n) -> n * n
