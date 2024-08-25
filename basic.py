@@ -564,9 +564,9 @@ class Parser:
         return res.success(atom)
 
     def atom(self):
+
         res = ParseResult()
         tok = self.current_tok
-
 
         if tok.type is TT_INT:
             res.register_advancement()
@@ -740,6 +740,7 @@ class Parser:
 
         res.register_advancement()
         self.advance()
+
         lambd_exp, index1 = self.getTokensUntil(self.tok_idx,TT_COL, TT_EOF)
         amount_delete = self.delete_tokens(self.tok_idx, index1)
         lambd_values, index2 = self.getTokensUntil(index1+1-amount_delete, TT_RPAREN, TT_COMMA)
@@ -750,15 +751,14 @@ class Parser:
         for i,j in zip(arg_name_toks, lambd_values):
             dic[f'{Token(i).type}'] = f'{j}'
 
-        new_tokens = []
         count = 0
         for arg in arg_name_toks:
             for tok in lambd_exp:
                 if f'{Token(tok).type}' == f'{Token(arg).type}' and f'{Token(arg).value}' == f'{Token(tok).value}':
                     parts = dic[f'{tok}'].split(':')
-                    after_colon = parts[1].strip()
-                    lambd_exp[count] = Token(TT_INT, after_colon, tok.pos_start)
-                    #new_tokens.append(Token(TT_INT, after_colon))
+                    if len(parts) > 1:
+                        after_colon = parts[1].strip()
+                        lambd_exp[count] = Token(TT_INT, int(after_colon), tok.pos_start)
                 count += 1
 
 
@@ -767,15 +767,8 @@ class Parser:
         del  self.tokens[self.tok_idx+amount_delete: self.tok_idx+amount_delete + 2*len(lambd_values)+1]
         del self.tokens[self.tok_idx -4 -2*len(arg_name_toks):self.tok_idx]
         self.tok_idx -= 4+2*len(arg_name_toks)
-
-        parser = Parser(self.tokens)
-        ast = parser.parse()
-        if ast.error: return None, ast.error
-        node_to_return = res.register(self.expr())
-
-        if res.error: return res
-
-        return res.success(LambdDefNode(self.tokens[self.tok_idx]))
+        self.current_tok = self.tokens[self.tok_idx]
+        return self.expr()
 
 
 
@@ -1371,7 +1364,6 @@ def run(fn, text):
     parser = Parser(tokens)
     ast = parser.parse()
     if ast.error: return None, ast.error
-
 
      # Run program
     interpreter = Interpreter()
