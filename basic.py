@@ -454,7 +454,7 @@ class Parser:
         return list, index + count
 
 
-    def ב(self, start_idx, end_idx):
+    def delete_tokens(self, start_idx, end_idx):
         del self.tokens[start_idx:end_idx]
         return end_idx - start_idx
 
