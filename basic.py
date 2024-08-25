@@ -741,6 +741,11 @@ class Parser:
         res.register_advancement()
         self.advance()
 
+
+        if self.current_tok.type == TT_RPAREN:
+            return res.failure(InvalidSyntaxError(self.current_tok.pos_start, self.current_tok.pos_end,
+                                                  f"Expected at least one parameter"))
+
         lambd_exp, index1 = self.getTokensUntil(self.tok_idx,TT_COL, TT_EOF)
         amount_delete = self.delete_tokens(self.tok_idx, index1)
         lambd_values, index2 = self.getTokensUntil(index1+1-amount_delete, TT_RPAREN, TT_COMMA)

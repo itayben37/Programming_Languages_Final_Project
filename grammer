@@ -21,9 +21,9 @@ func-def		:KEYWORD:FUN IDENTIFIER?
 							LPAREN (IDENTIFIER (COMMA IDENTIFIER)*)? RPAREN
 							ARROW expr
 
-lambd-def      :KEYWORD:FUN
-                    LPAREN (IDENTIFIER (COMMA IDENTIFIER)*)? RPAREN
-				    ARROW expr
+lambd-def      :KEYWORD:LAMBD
+                    LPAREN IDENTIFIER ((COMMA IDENTIFIER)*)? RPAREN
+				    ARROW LPAREN expr COLON INT ((COMMA INT)*)? RPAREN
 
 PLUA : +
 
@@ -70,4 +70,3 @@ NE : !=
 ? : can not appear at all
 
 
-LAMBD(x)->(x+x:1)
