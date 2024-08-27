@@ -16,6 +16,11 @@ atom 				: INT |IDENTIFIER
 						: LPAREN expr RPAREN
 						: func-def
 						: lambd-def
+						: if-expr
+
+if-expr			: KEYWORD:IF expr KEYWORD:THEN expr
+							(KEYWORD:ELIF expr KEYWORD:THEN expr)*
+							(KEYWORD:ELSE expr)?
 
 func-def		:KEYWORD:FUN IDENTIFIER?
 							LPAREN (IDENTIFIER (COMMA IDENTIFIER)*)? RPAREN
@@ -64,6 +69,8 @@ LTE : <=
 GTE : >=
 
 NE : !=
+
+IF : 
 
 * : appears at least 1 times
 
