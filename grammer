@@ -70,8 +70,6 @@ GTE : >=
 
 NE : !=
 
-IF : 
-
 * : appears at least 1 times
 
 ? : can not appear at all
